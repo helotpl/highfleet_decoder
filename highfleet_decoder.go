@@ -16,7 +16,8 @@ var begins = []string{
 	"EN ROUTE ",
 	"MY ROUTE ",
 	"TRAVEL SPEED ",
-	"HEADING"}
+	"HEADING ",
+	"ETA IN "}
 
 const (
 	letters = 'Z' - 'A' + 1
@@ -151,7 +152,6 @@ func TryMatchingTestsRemovals(line string, tests []string, numDials int, maxRemo
 		}
 		dials, success = TryMatchingTests(line, tests, numDials)
 		if success {
-			fmt.Println(removed)
 			move := 4 - removed%numDials
 			dials = append(dials[move:], dials[:move]...)
 			return
@@ -193,8 +193,11 @@ func main() {
 		dials, success := TryMatchingTestsRemovals(fullText, begins, 4, 10)
 		if success {
 			fmt.Println(dials)
+			fmt.Println(fullText)
+			fmt.Println(DecodeLine(fullText, dials))
 		}
 	} else {
+		fmt.Println(fullText)
 		fmt.Println(DecodeLine(fullText, []int{dial1, dial2, dial3, dial4}))
 	}
 
