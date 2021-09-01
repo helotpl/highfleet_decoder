@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"unicode"
 )
 
@@ -14,7 +15,8 @@ var begins = []string{
 	"NOW HEADING ",
 	"EN ROUTE ",
 	"MY ROUTE ",
-	"TRAVEL SPEED "}
+	"TRAVEL SPEED ",
+	"HEADING"}
 
 const (
 	letters = 'Z' - 'A' + 1
@@ -133,6 +135,31 @@ func TryMatching(line, sample string, numDials int) (dials []int, success bool) 
 	return dials, true
 }
 
+func TryMatchingTestsRemovals(line string, tests []string, numDials int, maxRemovals int) (dials []int, success bool) {
+	removed := 0
+	for i := 0; i < maxRemovals; i++ {
+		if len(line) < 1 {
+			return nil, false
+		}
+		if i > 0 {
+			splits := strings.SplitN(line, " ", 2)
+			if len(splits) != 2 {
+				return nil, false
+			}
+			line = splits[1]
+			removed += len(splits[0]) + 1
+		}
+		dials, success = TryMatchingTests(line, tests, numDials)
+		if success {
+			fmt.Println(removed)
+			move := 4 - removed%numDials
+			dials = append(dials[move:], dials[:move]...)
+			return
+		}
+	}
+	return nil, false
+}
+
 func main() {
 	var dial1, dial2, dial3, dial4 int
 	flag.IntVar(&dial1, "d1", 0, "decoding dial one")
@@ -152,15 +179,23 @@ func main() {
 	}
 	defer file.Close()
 
+	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		if *find {
-			dials, success := TryMatchingTests(scanner.Text(), begins, 4)
-			if success {
-				fmt.Println(dials)
-			}
-		} else {
-			fmt.Println(DecodeLine(scanner.Text(), []int{dial1, dial2, dial3, dial4}))
-		}
+		lines = append(lines, scanner.Text())
 	}
+	if scanner.Err() != nil {
+		log.Fatal(scanner.Err())
+	}
+
+	fullText := strings.Join(lines, " ")
+	if *find {
+		dials, success := TryMatchingTestsRemovals(fullText, begins, 4, 10)
+		if success {
+			fmt.Println(dials)
+		}
+	} else {
+		fmt.Println(DecodeLine(fullText, []int{dial1, dial2, dial3, dial4}))
+	}
+
 }
