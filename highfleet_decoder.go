@@ -17,7 +17,10 @@ var begins = []string{
 	"MY ROUTE ",
 	"TRAVEL SPEED ",
 	"HEADING ",
-	"ETA IN "}
+	"ETA IN ",
+	"WILL ARRIVE ",
+	"FOLLOWING THE ROUTE ",
+}
 
 const (
 	letters = 'Z' - 'A' + 1
